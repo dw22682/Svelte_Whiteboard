@@ -1,2 +1,18 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script>
+	import Toolbar from "$lib/components/Toolbar.svelte";
+	import WhiteboardCanvas from "$lib/components/WhiteboardCanvas.svelte";
+
+</script>
+
+
+<div class="app-container h-screen flex bg-gray-50">
+    <!--Left Sidebar-->
+    <div class="w-80 bg-white shadow-xl z-10">
+        <Toolbar />
+    </div>
+
+    <!--Main Canvas-->
+    <div class="flex-1 relative">
+        <WhiteboardCanvas />
+    </div>
+</div>
