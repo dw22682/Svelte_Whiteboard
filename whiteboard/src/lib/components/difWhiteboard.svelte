@@ -14,7 +14,6 @@
             if (canvas) {
                 canvas.width = window.innerWidth - 300;
                 canvas.height = window.innerHeight - 100;
-                console.log(window.innerWidth);
             }
         };
 

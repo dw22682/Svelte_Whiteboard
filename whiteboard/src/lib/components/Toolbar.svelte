@@ -26,7 +26,7 @@
     <div class="space-y-4">
     <!-- Color Picker -->
     <div class="flex items-center space-x-3">
-      <span class="text-sm font-medium">Stroke:</span>
+      <span class="text-sm font-medium">Colour:</span>
       <button
         class="w-8 h-8 rounded border border-gray-300"
         style="background-color: {$brushColor}"
