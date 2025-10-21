@@ -2,7 +2,7 @@
     //@ts-nocheck
   import { currentTool, availableTools, toolActions } from '$lib/stores/toolStore';
   import { brushColor, brushSize, fillColor } from '$lib/stores/toolStore';
-  import { whiteboardActions } from '$lib/stores/whiteboardStore';
+  import { whiteboardActions, whiteboardState } from '$lib/stores/whiteboardStore';
   import ColorPicker from './ColourPicker.svelte';
   
   let showColorPicker = false;
@@ -36,7 +36,10 @@
         <div class="absolute z-20 mt-50">
           <ColorPicker
             bind:color={$brushColor}
-            on:change={(e) => toolActions.setColor(e.detail)}
+            on:change={(e) => {
+                //toolActions.setColor(e.detail);
+                let state = $whiteboardState;
+                state.currentColor = e.detail;}}
           />
         </div>
       {/if}

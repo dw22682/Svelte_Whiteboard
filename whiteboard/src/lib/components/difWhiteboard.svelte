@@ -1,10 +1,12 @@
 <script>
     //@ts-nocheck
 	import {onMount} from 'svelte'
-    import {zoomLevel} from '$lib/stores/whiteboardStore'
+    import {zoomLevel, whiteboardState} from '$lib/stores/whiteboardStore'
 
     let canvas;
     onMount(() => {
+
+        let state = $whiteboardState;
 
         //handle resizing
         const handleResize = () => {
@@ -28,15 +30,89 @@
             console.log("LINE");
             let ctx = canvas.getContext('2d');
             ctx.beginPath();
-            ctx.fillRect(Math.floor(Math.random()*800) + 1,Math.floor(Math.random()*800) + 1,Math.floor(Math.random()*300) + 1,1)
+            ctx.strokeStyle = state.currentColor;
+            //ctx.fillRect(Math.floor(Math.random()*800) + 1,Math.floor(Math.random()*800) + 1,Math.floor(Math.random()*300) + 1,1)
+            let startX = Math.floor(Math.random() * 800) + 1;
+            let starty = Math.floor(Math.random() * 800) + 1;
+            let endX = Math.floor(Math.random() * 800) + 1;
+            let endY = Math.floor(Math.random() * 800) + 1;
+
+            ctx.moveTo(startX, starty);
+            ctx.lineTo(endX, endY);
+
             ctx.stroke();
         };
 
-        window.addEventListener('mousedown', drawRandomLine);
+        const clearScreen = () => {
+            console.log("CLEAR SCREEN");
+            let ctx = canvas.getContext('2d');
+            ctx.beginPath();
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+        };
+
+        const handleMouseDown =  ({ clientX, clientY, currentTarget}) => {
+            console.log("CLICK");
+            state.isDrawing = true;
+            draw(
+                clientX - canvas.getBoundingClientRect().left,
+                clientY - canvas.getBoundingClientRect().top
+            );
+        }
+
+        const handleMouseUp = () => {
+            state.isDrawing = false;
+        }
+
+        const draw = (x, y) => {
+            if(state.isDrawing) {
+                let ctx = canvas.getContext('2d');
+                ctx.beginPath();
+                ctx.strokeStyle = state.currentColor;
+                ctx.fillStyle = state.currentColor;
+                ctx.arc(x, y, state.brushSize, 0, 2 * Math.PI, false);
+                ctx.fill();
+                ctx.stroke();
+            }
+        };
+
+        const handleMouseMove = ({clientX, clientY, currentTarget}) => {
+            draw(
+                clientX - canvas.getBoundingClientRect().left,
+                clientY - canvas.getBoundingClientRect().top
+            );
+        }
+
+        const handleKeydown = (event) => {
+            switch(event.key){
+                case('l'): {
+                    drawRandomLine();
+                    break;
+                }
+                case('c'): {
+                    clearScreen();
+                    break;
+                }
+                case('p'): {
+                    console.log(state.currentColor);
+                    break;
+                }
+
+                default:
+                    return;
+            }
+        }
+
+        window.addEventListener('keydown', handleKeydown);
+        window.addEventListener('mousedown', handleMouseDown);
+        window.addEventListener('mouseup', handleMouseUp);
+        window.addEventListener('mousemove', handleMouseMove);
 
         return () => {
             window.removeEventListener('resize', handleResize);
-            window.removeEventListener('mousedown', handleKeydown);
+            window.removeEventListener('keydown', handleKeydown);
+            window.removeEventListener('mousedown', handleMouseDown);
+            window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('mousemove', handleMouseMove);
         };
     })
 </script>
