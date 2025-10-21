@@ -1,7 +1,7 @@
 <script>
     // @ts-nocheck
     import { onMount, onDestroy } from 'svelte'
-    import { zoomLevel, canvasStore, whiteboardActions } from '$lib/stores/whiteboardStore';
+    import { canvasStore } from '$lib/stores/whiteboardStore';
     import { currentTool, toolActions } from '$lib/stores/toolStore';
 
     let canvasElement;

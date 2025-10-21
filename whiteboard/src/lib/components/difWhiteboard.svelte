@@ -1,12 +1,13 @@
 <script>
     //@ts-nocheck
 	import {onMount} from 'svelte'
-    import {zoomLevel, whiteboardState} from '$lib/stores/whiteboardStore'
+    import { whiteboardState, canvasStore } from '$lib/stores/whiteboardStore'
 
     let canvas;
     onMount(() => {
 
         let state = $whiteboardState;
+        $canvasStore = canvas;
 
         //handle resizing
         const handleResize = () => {
@@ -31,6 +32,7 @@
             let ctx = canvas.getContext('2d');
             ctx.beginPath();
             ctx.strokeStyle = state.currentColor;
+            ctx.lineWidth = state.brushSize;
             //ctx.fillRect(Math.floor(Math.random()*800) + 1,Math.floor(Math.random()*800) + 1,Math.floor(Math.random()*300) + 1,1)
             let startX = Math.floor(Math.random() * 800) + 1;
             let starty = Math.floor(Math.random() * 800) + 1;
@@ -43,6 +45,37 @@
             ctx.stroke();
         };
 
+        const drawRandomRect = () => {
+            console.log("Rectangle");
+            let ctx = canvas.getContext('2d');
+            ctx.beginPath();
+            ctx.strokeStyle = state.currentColor;
+            ctx.lineWidth = state.brushSize;
+            //ctx.fillRect(Math.floor(Math.random()*800) + 1,Math.floor(Math.random()*800) + 1,Math.floor(Math.random()*300) + 1,1)
+            let x = Math.floor(Math.random() * 800) + 1;
+            let y = Math.floor(Math.random() * 800) + 1;
+            let h = Math.floor(Math.random() * 1600) + 1 - 800;
+            let w = Math.floor(Math.random() * 1600) + 1 - 800;
+
+            ctx.rect(x, y, h, w);
+            ctx.stroke();
+        };
+
+        const drawRandomCircle = () => {
+            console.log("Circle");
+            let ctx = canvas.getContext('2d');
+            ctx.beginPath();
+            ctx.strokeStyle = state.currentColor;
+            ctx.lineWidth = state.brushSize;
+            //ctx.fillRect(Math.floor(Math.random()*800) + 1,Math.floor(Math.random()*800) + 1,Math.floor(Math.random()*300) + 1,1)
+            let x = Math.floor(Math.random() * 800) + 1;
+            let y = Math.floor(Math.random() * 800) + 1;
+            let r = Math.floor(Math.random() * 400) + 1;
+
+            ctx.arc(x, y, r, 0, 2* Math.PI, false);
+            ctx.stroke();
+        };
+
         const clearScreen = () => {
             console.log("CLEAR SCREEN");
             let ctx = canvas.getContext('2d');
@@ -52,11 +85,44 @@
 
         const handleMouseDown =  ({ clientX, clientY, currentTarget}) => {
             console.log("CLICK");
-            state.isDrawing = true;
-            draw(
-                clientX - canvas.getBoundingClientRect().left,
-                clientY - canvas.getBoundingClientRect().top
-            );
+
+            switch (state.currentTool) {
+                case('brush'): {
+                    state.isDrawing = true;
+                    state.lastLocation = {x: clientX - canvas.getBoundingClientRect().left,
+                        y: clientY - canvas.getBoundingClientRect().top
+                    }
+                    draw(
+                        clientX - canvas.getBoundingClientRect().left,
+                        clientY - canvas.getBoundingClientRect().top
+                    );
+                    break;
+                }
+                case('line'): {
+                    drawRandomLine();
+                    break;
+                }
+                case('rectangle'): {
+                    drawRandomRect();
+                    break;
+                }
+                case('circle'): {
+                    drawRandomCircle();
+                    break;
+                }
+                case('eraser'): {
+                    state.isDrawing = true;
+                    state.lastLocation = {x: clientX - canvas.getBoundingClientRect().left,
+                        y: clientY - canvas.getBoundingClientRect().top
+                    }
+                    erase(
+                        clientX - canvas.getBoundingClientRect().left,
+                        clientY - canvas.getBoundingClientRect().top
+                    );
+                    break;  
+                }
+            }
+
         }
 
         const handleMouseUp = () => {
@@ -69,17 +135,47 @@
                 ctx.beginPath();
                 ctx.strokeStyle = state.currentColor;
                 ctx.fillStyle = state.currentColor;
-                ctx.arc(x, y, state.brushSize, 0, 2 * Math.PI, false);
-                ctx.fill();
+                ctx.lineWidth = state.brushSize;
+                //ctx.arcTo(state.lastLocation.x, state.lastLocation.y, x, y, state.brushSize);
+                ctx.moveTo(state.lastLocation.x, state.lastLocation.y);
+                ctx.lineTo(x, y);
                 ctx.stroke();
+                ctx.arc(x, y, state.brushSize / 2, 0, 2 * Math.PI, false);
+                ctx.fill();
+                state.lastLocation = {x: x, y: y};
+            }
+        };
+
+        const erase = (x, y) => {
+            if(state.isDrawing) {
+                let ctx = canvas.getContext('2d');
+                ctx.beginPath();
+                ctx.strokeStyle = '#f3f4f6';
+                ctx.fillStyle = '#f3f4f6';
+                ctx.lineWidth = state.brushSize;
+                //ctx.arcTo(state.lastLocation.x, state.lastLocation.y, x, y, state.brushSize);
+                ctx.moveTo(state.lastLocation.x, state.lastLocation.y);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.arc(x, y, state.brushSize / 2, 0, 2 * Math.PI, false);
+                ctx.fill();
+                state.lastLocation = {x: x, y: y};
             }
         };
 
         const handleMouseMove = ({clientX, clientY, currentTarget}) => {
-            draw(
-                clientX - canvas.getBoundingClientRect().left,
-                clientY - canvas.getBoundingClientRect().top
-            );
+            if (state.currentTool === 'brush') {
+                draw(
+                    clientX - canvas.getBoundingClientRect().left,
+                    clientY - canvas.getBoundingClientRect().top
+                );
+            }
+            else {
+                erase(
+                    clientX - canvas.getBoundingClientRect().left,
+                    clientY - canvas.getBoundingClientRect().top
+                );
+            }
         }
 
         const handleKeydown = (event) => {
@@ -96,6 +192,10 @@
                     console.log(state.currentColor);
                     break;
                 }
+                case('t'): {
+                    console.log(state.currentTool);
+                    break;
+                }
 
                 default:
                     return;
@@ -103,16 +203,16 @@
         }
 
         window.addEventListener('keydown', handleKeydown);
-        window.addEventListener('mousedown', handleMouseDown);
-        window.addEventListener('mouseup', handleMouseUp);
-        window.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mouseup', handleMouseUp);
+        canvas.addEventListener('mousemove', handleMouseMove);
 
         return () => {
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('keydown', handleKeydown);
-            window.removeEventListener('mousedown', handleMouseDown);
-            window.removeEventListener('mouseup', handleMouseUp);
-            window.removeEventListener('mousemove', handleMouseMove);
+            canvas.removeEventListener('mousedown', handleMouseDown);
+            canvas.removeEventListener('mouseup', handleMouseUp);
+            canvas.removeEventListener('mousemove', handleMouseMove);
         };
     })
 </script>

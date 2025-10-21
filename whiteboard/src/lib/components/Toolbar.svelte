@@ -2,7 +2,7 @@
     //@ts-nocheck
   import { currentTool, availableTools, toolActions } from '$lib/stores/toolStore';
   import { brushColor, brushSize, fillColor } from '$lib/stores/toolStore';
-  import { whiteboardActions, whiteboardState } from '$lib/stores/whiteboardStore';
+  import { canvasStore, whiteboardState } from '$lib/stores/whiteboardStore';
   import ColorPicker from './ColourPicker.svelte';
   
   let showColorPicker = false;
@@ -13,8 +13,8 @@
     <div class='grid grid-cols-4 gap-2 mb-4'>
         {#each Object.entries(availableTools) as [id, tool]}
             <button class='p-3 rounded-lg transition-colors flex flex-col items-center bg-gray-100 hover:bg-gray-200'
-                class:bg-gray-200={$currentTool === id}
-                on:click={() => toolActions.setTool(id)}
+                class:bg-gray-200={$whiteboardState.currentTool === id}
+                on:click={() => $whiteboardState.currentTool = id}
                 title={tool.name}
             >
                 <span class="text-lg">{tool.icon}</span>
@@ -53,7 +53,7 @@
         min="1"
         max="50"
         bind:value={$brushSize}
-        on:input={(e) => toolActions.setBrushSize(parseInt(e.target.value))}
+        on:input={(e) => $whiteboardState.brushSize = (parseInt(e.target.value))}
         class="w-24"
       />
       <span class="text-sm w-8">{$brushSize}px</span>
@@ -62,23 +62,13 @@
     <!-- Action Buttons -->
     <div class="grid grid-cols-2 gap-2 pt-4 border-t">
       <button
-        on:click={whiteboardActions.undo}
-        class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm"
-      >
-        ↶ Undo
-      </button>
-      <button
-        on:click={whiteboardActions.redo}
-        class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm"
-      >
-        ↷ Redo
-      </button>
-      <button
         on:click={() => {
-          const canvas = get(canvasStore);
+          let canvas = $canvasStore;
           if (canvas) {
-            canvas.clear();
-            whiteboardActions.saveToHistory();
+            console.log("CLEAR SCREEN");
+            let ctx = canvas.getContext('2d');
+            ctx.beginPath();
+            ctx.clearRect(0,0, canvas.width, canvas.height);
           }
         }}
         class="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded text-sm col-span-2"

@@ -8,13 +8,10 @@ export const brushSize = writable(5);
 export const fillColor = writable('#ffffff');
 
 export const availableTools = {
-  select: { name: 'Select', icon: '🔍' },
-  pan: { name: 'Pan', icon: '✋' },
   brush: { name: 'Brush', icon: '🖌️' },
   rectangle: { name: 'Rectangle', icon: '⬜' },
   circle: { name: 'Circle', icon: '⭕' },
   line: { name: 'Line', icon: '📏' },
-  text: { name: 'Text', icon: '📝' },
   eraser: { name: 'Eraser', icon: '🧹' }
 };
 
