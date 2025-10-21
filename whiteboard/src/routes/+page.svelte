@@ -2,8 +2,7 @@
 // @ts-nocheck
 
 	import Toolbar from "$lib/components/Toolbar.svelte";
-	import WhiteboardCanvas from "$lib/components/WhiteboardCanvas.svelte";
-    import DifWhiteboard from "$lib/components/difWhiteboard.svelte";
+    import Whiteboard from "$lib/components/Whiteboard.svelte";
 
     let showLayers = false;
 </script>
@@ -17,6 +16,6 @@
 
     <!--Main Canvas-->
     <div class="flex-1 relative">
-        <DifWhiteboard />
+        <Whiteboard />
     </div>
 </div>

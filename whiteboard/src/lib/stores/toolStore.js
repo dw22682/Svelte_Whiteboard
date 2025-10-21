@@ -1,5 +1,7 @@
 // @ts-nocheck
 // src/lib/stores/toolStore.js
+//Most of this was created by deep seek when I was testing
+// Very little is still used and I am in the process of cleaning it up
 import { writable } from 'svelte/store';
 
 export const currentTool = writable('brush');

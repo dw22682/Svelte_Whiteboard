@@ -1,5 +1,4 @@
 // @ts-nocheck
-import { Canvas } from "fabric";
 import { writable, derived } from "svelte/store";
 
 export const canvasStore = writable(null);
